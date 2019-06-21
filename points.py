@@ -14,7 +14,7 @@ import time
 #importing math for basic mathematical operations
 import math as m
 #scipy used here for smoothening the matplotlib curves
-from scipy.ndimage import gaussian_filter
+from scipy.interpolate import spline
 
 #The function is used for calculation of EAR for an eye
 def EAR(point1,point2,point3,point4,point5,point6):
@@ -88,21 +88,24 @@ while(time.time() - currenttime <= 23): #The calibration code will run for 23 se
 
 # Plotting the recorded points when both eyes are open
 plt.subplot(2,2,1)
-eyeopen_smooth = gaussian_filter(eyeopen,sigma = 5)
+t1_smooth = np.linspace(min(t1),max(t1),25)
+eyeopen_smooth = spline(t1,eyeopen,t1_smooth)
 plt.title('Both Eyes Open')
-plt.plot(t1,eyeopen_smooth)
+plt.plot(t1_smooth,eyeopen_smooth)
 
 # Plotting the recorded points when left eye is closed
 plt.subplot(2,2,2)
-lclick_smooth = gaussian_filter(lclick,sigma = 5)
+t2_smooth = np.linspace(min(t2),max(t2),25)
+lclick_smooth = spline(t2,lclick,t2_smooth)
 plt.title('Left click')
-plt.plot(t2,lclick_smooth)
+plt.plot(t2_smooth,lclick_smooth)
 
 # Plotting the recorded points when right eye is closed
 plt.subplot(2,2,3)
-rclick_smooth = gaussian_filter(rclick,sigma = 5)
+t3_smooth = np.linspace(min(t3),max(t3),25)
+rclick_smooth = spline(t3,rclick,t3_smooth)
 plt.title('Right click')
-plt.plot(t3,rclick_smooth)
+plt.plot(t3_smooth,rclick_smooth)
 
 plt.show() # Display of graph. Press any key to exit the graph
 cap.release()
