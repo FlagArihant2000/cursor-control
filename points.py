@@ -25,6 +25,11 @@ def MAR(point1,point2,point3,point4,point5,point6,point7,point8):
 def EAR(point1,point2,point3,point4,point5,point6):
 	ear = (dst(point2,point6) + dst(point3,point5))/(2*dst(point1,point4))*1.0
 	return ear
+
+def EyeCentroid(point1,point2):
+	centroid = ((point1[0] + point2[0])/2,(point1[1] + point2[1])/2)
+	return centroid
+
 # The function is used for calculating the distance between the two points. This is primarily used for calculating EAR
 def dst(point1, point2):
 	distance = m.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
@@ -77,16 +82,19 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 			t1 = np.append(t1,[elapsedTime])
 		elif elapsedTime > 5.0 and elapsedTime < 10.0: # recording the phase when only left eye is closed
 			cv2.putText(image,'Close Left Eye',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
-			lclick = np.append(lclick,[EARdiff])
-			t2 = np.append(t2,[elapsedTime])
+			if elapsedTime > 7.0 and elapsedTime < 10.0:
+				lclick = np.append(lclick,[EARdiff])
+				t2 = np.append(t2,[elapsedTime])
 		elif elapsedTime > 12.0 and elapsedTime < 17.0: # recording the phase for only right eye
 			cv2.putText(image,'Open Left eye and close Right Eye',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
-			rclick = np.append(rclick,[EARdiff])
-			t3 = np.append(t3,[elapsedTime])
+			if elapsedTime > 14.0 and elapsedTime < 17.0:
+				rclick = np.append(rclick,[EARdiff])
+				t3 = np.append(t3,[elapsedTime])
 		elif elapsedTime > 19.0 and elapsedTime < 24.0: # recording the phase for open mouth
 			cv2.putText(image,'Open Your Mouth',(0,100),font,1,(0,0,0),2,cv2.LINE_AA)
-			scroll = np.append(scroll,[mar])
-			t4 = np.append(t4,[elapsedTime])
+			if elapsedTime > 21.0 and elapsedTime < 24.0:
+				scroll = np.append(scroll,[mar])
+				t4 = np.append(t4,[elapsedTime])
 		else: # no recording done in this phase. It is just a small lag
 			pass 
 		for (x,y) in shape: # prints facial landmarks on the face
@@ -193,7 +201,8 @@ while(True):
 		for (x, y) in shape:
 			cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 		cv2.circle(image,(h,k),2,(255,0,0),-1)
-		cv2.circle(image,(shape[36][0],shape[36][1]),2,(0,0,255),-1)
+		cv2.circle(image,(100,100),2,(0,0,255),-1)
+		#cv2.circle(image,(xr,yr),2,(0,0,255),-1)
 		cv2.imshow("Output", image)
 	    
 		k = cv2.waitKey(5) & 0xFF
