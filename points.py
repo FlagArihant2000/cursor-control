@@ -26,10 +26,6 @@ def EAR(point1,point2,point3,point4,point5,point6):
 	ear = (dst(point2,point6) + dst(point3,point5))/(2*dst(point1,point4))*1.0
 	return ear
 
-def EyeCentroid(point1,point2):
-	centroid = ((point1[0] + point2[0])/2,(point1[1] + point2[1])/2)
-	return centroid
-
 # The function is used for calculating the distance between the two points. This is primarily used for calculating EAR
 def dst(point1, point2):
 	distance = m.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
@@ -47,6 +43,8 @@ lclick = np.array([])
 rclick = np.array([])
 scroll = np.array([])
 eyeopen = np.array([])
+lclickarea = np.array([])
+rclickarea = np.array([])
 t1 = np.array([])
 t2 = np.array([])
 t3 = np.array([])
@@ -55,7 +53,8 @@ t4 = np.array([])
 p = "shape_predictor.dat"
 detector = dlib.get_frontal_face_detector() # Returns a default face detector object
 predictor = dlib.shape_predictor(p) # Outputs a set of location points that define a pose of the object. (Here, pose of the human face)
-
+(lstart,lend) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+(rstart,rend) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 #The first snippet of code is basically for calibration of the EARdifference for left as well as the right eye
 cap = cv2.VideoCapture(0)
 #font used for putting text on the screen(will be used in sometime)
@@ -75,6 +74,14 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		righteye = EAR(shape[42],shape[43],shape[44],shape[45],shape[46],shape[47])
 		mar = MAR(shape[50],shape[58],shape[51],shape[57],shape[52],shape[56],shape[48],shape[54])
 		EARdiff = (lefteye - righteye)*100
+		leftEye = shape[lstart:lend]
+		rightEye = shape[rstart:rend]
+		leftEyeHull = cv2.convexHull(leftEye)
+		rightEyeHull = cv2.convexHull(rightEye)
+		cv2.drawContours(image,[leftEyeHull],-1,(0,255,0),1)
+		cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
+		larea = cv2.contourArea(leftEyeHull)
+		rarea = cv2.contourArea(rightEyeHull)
 		elapsedTime = time.time() - currenttime
 		if elapsedTime < 5.0: # recording the phase where both eyes are open
 			cv2.putText(image,'Keep Both Eyes Open',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
@@ -84,11 +91,13 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 			cv2.putText(image,'Close Left Eye',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
 			if elapsedTime > 7.0 and elapsedTime < 10.0:
 				lclick = np.append(lclick,[EARdiff])
+				lclickarea = np.append(lclickarea,[larea])
 				t2 = np.append(t2,[elapsedTime])
 		elif elapsedTime > 12.0 and elapsedTime < 17.0: # recording the phase for only right eye
 			cv2.putText(image,'Open Left eye and close Right Eye',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
 			if elapsedTime > 14.0 and elapsedTime < 17.0:
 				rclick = np.append(rclick,[EARdiff])
+				rclickarea = np.append(rclickarea,[rarea])
 				t3 = np.append(t3,[elapsedTime])
 		elif elapsedTime > 19.0 and elapsedTime < 24.0: # recording the phase for open mouth
 			cv2.putText(image,'Open Your Mouth',(0,100),font,1,(0,0,0),2,cv2.LINE_AA)
@@ -137,9 +146,11 @@ cap = cv2.VideoCapture(0)
 MARlist = np.array([]) # Initialization of a MAR list which will be resued after every 30 iterations
 scroll_status = 0 # Checks the scroll status: 1:ON 0:OFF
 openeyes = np.mean(eyeopen) # Calculates mean of the recorded values for the case when both eyes are opened.
-leftclick = np.average(lclick) - 1.5# Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
-rightclick = np.average(rclick) + 1.5 # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
+leftclick = np.mean(lclick) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
+rightclick = np.mean(rclick)  # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
 scrolling = np.mean(scroll)
+leftclickarea = np.mean(lclickarea)
+rightclickarea = np.mean(rclickarea)
 print("Left click value = "+str(leftclick)) # Prints the result
 print("Right click value = "+str(rightclick)) # Prints the result
 while(True):
@@ -162,15 +173,24 @@ while(True):
 			lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41]) # Calculation of the EAR for left eye
 			righteye = EAR(shape[42],shape[43],shape[44],shape[45],shape[46],shape[47]) # Calculation of the EAR for right eye
 			EARdiff = (lefteye - righteye)*100 # Calculating the difference in EAR in percentage
-			mar = MAR(shape[50],shape[58],shape[51],shape[57],shape[52],shape[56],shape[48],shape[54]) # Calculation of the MAR of mouth
-			if EARdiff < leftclick: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration
-				pag.click(button = 'left') 
-			elif EARdiff > rightclick: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
-				pag.click(button = 'right')
-				
+			mar = MAR(shape[50],shape[58],shape[51],shape[57],shape[52],shape[56],shape[48],shape[54]) # Calculation of the MAR of mouth	
 					
 			cv2.line(image,(250,250),(h,k),(0,0,0),1) # Draws a line between the tip of the nose and the centre of reference circle
 			# Controls the move of mouse according to the position of the found nose.
+			leftEye = shape[lstart:lend]
+			rightEye = shape[rstart:rend]
+			leftEyeHull = cv2.convexHull(leftEye)
+			rightEyeHull = cv2.convexHull(rightEye)
+			cv2.drawContours(image,[leftEyeHull],-1,(0,255,0),1)
+			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
+			larea = cv2.contourArea(leftEyeHull)
+			rarea = cv2.contourArea(rightEyeHull)
+			if EARdiff < leftclick and larea < rarea and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration
+				pag.click(button = 'left') 
+			elif EARdiff > rightclick and rarea < larea and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
+				pag.click(button = 'right')
+		
+		
 		MARlist = np.append(MARlist,[mar]) # Appending the list at every iteration
 		if len(MARlist) == 30: # till it reaches a size of 30 elements
 			mar_avg = np.mean(MARlist)
