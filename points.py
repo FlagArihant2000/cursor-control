@@ -185,9 +185,10 @@ while(True):
 			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
-			if EARdiff < leftclick and larea < rarea and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration
+			print(larea,rarea)
+			if EARdiff < leftclick and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration
 				pag.click(button = 'left') 
-			elif EARdiff > rightclick and rarea < larea and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
+			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
 				pag.click(button = 'right')
 		
 		
