@@ -145,12 +145,20 @@ cv2.destroyAllWindows()
 cap = cv2.VideoCapture(0)
 MARlist = np.array([]) # Initialization of a MAR list which will be resued after every 30 iterations
 scroll_status = 0 # Checks the scroll status: 1:ON 0:OFF
-openeyes = np.mean(eyeopen) # Calculates mean of the recorded values for the case when both eyes are opened.
-leftclick = np.mean(lclick) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
-rightclick = np.mean(rclick)  # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
-scrolling = np.mean(scroll)
-leftclickarea = np.mean(lclickarea)
-rightclickarea = np.mean(rclickarea)
+eyeopen = np.sort(eyeopen)
+lclick = np.sort(lclick)
+rclick = np.sort(rclick)
+scroll = np.sort(scroll)
+lclickarea = np.sort(lclickarea)
+rclickarea = np.sort(rclickarea)
+openeyes = np.median(eyeopen) # Calculates mean of the recorded values for the case when both eyes are opened.
+leftclick = np.median(lclick) - np.std(lclick) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
+rightclick = np.median(rclick) + np.std(rclick)  # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
+scrolling = np.median(scroll)
+leftclickarea = np.median(lclickarea)
+rightclickarea = np.median(rclickarea)
+print("Standard Deviation = "+str(np.std(lclick)))
+print("Standard Deviation = "+str(np.std(rclick)))
 print("Left click value = "+str(leftclick)) # Prints the result
 print("Right click value = "+str(rightclick)) # Prints the result
 while(True):
@@ -185,7 +193,6 @@ while(True):
 			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
-			print(larea,rarea)
 			if EARdiff < leftclick and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration
 				pag.click(button = 'left') 
 			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
