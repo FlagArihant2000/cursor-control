@@ -168,7 +168,8 @@ while(True):
 		image=cv2.flip(image,1)
 	    # Converting the image to gray scale image
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		gray = cv2.equalizeHist(gray)
+		#clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
+		#gray = clahe.apply(gray)
 		cv2.circle(image,(250,250),50,(0,0,255),2)
 	    # Get faces into webcam's image
 		rects = detector(gray, 0)
