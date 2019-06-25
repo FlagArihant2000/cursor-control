@@ -15,7 +15,9 @@ import time
 import math as m
 #scipy used here for smoothening the matplotlib curves
 from scipy.ndimage import gaussian_filter
+import autopy as a
 
+pag.PAUSE = 0
 # The function is used for calculation of MAR for the mouth
 def MAR(point1,point2,point3,point4,point5,point6,point7,point8):
 	mar = (dst(point1,point2) + dst(point3,point4) + dst(point5,point6))/(3.0*dst(point7,point8))
@@ -65,7 +67,9 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 	ret,image = cap.read()
 	image = cv2.flip(image,1)
 	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-	gray = cv2.equalizeHist(gray)
+	clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
+	gray = clahe.apply(gray)
+	#gray = cv2.equalizeHist(gray)
 	rects = detector(gray,0)
 	for (i,rect) in enumerate(rects):
 		shape = predictor(gray,rect)
@@ -199,7 +203,7 @@ while(True):
 			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
 				pag.click(button = 'right')
 		
-		
+		roi = image[shape[37][0]:shape[38][0],shape[37][1]:shape[41][1]]
 		MARlist = np.append(MARlist,[mar]) # Appending the list at every iteration
 		if len(MARlist) == 30: # till it reaches a size of 30 elements
 			mar_avg = np.mean(MARlist)
@@ -214,8 +218,10 @@ while(True):
 				a = angle(shape[33]) # Calculates the angle
 				if h > 250: # The below conditions set the conditions for the mouse to move and that too in any direction we desire it to move to.
 					pag.moveTo(pag.position()[0]+(10*m.cos(-1.0*a)),pag.position()[1]+(10*m.sin(-1.0*a)),duration = 0.01)
+					#a.mouse.smooth_move(a.mouse.location()(0)+(10*m.cos(-1.0*a)),a.mouse.location()(1)+(10*m.sin(-1.0*a)))
 				else:
 					pag.moveTo(pag.position()[0]-(10*m.cos(-1.0*a)),pag.position()[1]-(10*m.sin(-1.0*a)),duration = 0.01)
+					#a.mouse.smooth_move(a.mouse.location()(0)-(10*m.cos(-1.0*a)),a.mouse.location()(1)-(10*m.sin(-1.0*a)))
 		else: #Enabling scroll status
 			cv2.putText(image,'Scroll mode ON',(0,100),font,1,(0,0,0),2,cv2.LINE_AA)
 			if k > 300: 
@@ -233,7 +239,7 @@ while(True):
 		cv2.circle(image,(100,100),2,(0,0,255),-1)
 		#cv2.circle(image,(xr,yr),2,(0,0,255),-1)
 		cv2.imshow("Output", image)
-	    
+		cv2.imshow('ROI',roi) 
 		k = cv2.waitKey(5) & 0xFF
 		if k == 27:
 			break
