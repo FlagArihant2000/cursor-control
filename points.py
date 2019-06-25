@@ -202,7 +202,7 @@ while(True):
 				pag.click(button = 'left') 
 			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
 				pag.click(button = 'right')
-		
+			
 		roi = image[shape[37][0]:shape[38][0],shape[37][1]:shape[41][1]]
 		MARlist = np.append(MARlist,[mar]) # Appending the list at every iteration
 		if len(MARlist) == 30: # till it reaches a size of 30 elements
@@ -217,9 +217,11 @@ while(True):
 			if((h-250)**2 + (k-250)**2 - 50**2 > 0):
 				a = angle(shape[33]) # Calculates the angle
 				if h > 250: # The below conditions set the conditions for the mouse to move and that too in any direction we desire it to move to.
+					time.sleep(0.03)
 					pag.moveTo(pag.position()[0]+(10*m.cos(-1.0*a)),pag.position()[1]+(10*m.sin(-1.0*a)),duration = 0.01)
 					#a.mouse.smooth_move(a.mouse.location()(0)+(10*m.cos(-1.0*a)),a.mouse.location()(1)+(10*m.sin(-1.0*a)))
 				else:
+					time.sleep(0.03)
 					pag.moveTo(pag.position()[0]-(10*m.cos(-1.0*a)),pag.position()[1]-(10*m.sin(-1.0*a)),duration = 0.01)
 					#a.mouse.smooth_move(a.mouse.location()(0)-(10*m.cos(-1.0*a)),a.mouse.location()(1)-(10*m.sin(-1.0*a)))
 		else: #Enabling scroll status
