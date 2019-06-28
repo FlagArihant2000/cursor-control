@@ -168,6 +168,7 @@ print("Standard Deviation = "+str(np.std(rclick)))
 print("Left click value = "+str(leftclick)) # Prints the result
 print("Right click value = "+str(rightclick)) # Prints the result
 clahe = cv2.createCLAHE(clipLimit=2.0,tileGridSize=(8,8))
+ll = 0
 while(True):
 	try: 
 		frameTimeInitial = time.time()
@@ -178,6 +179,7 @@ while(True):
 		image2 = cv2.flip(image2,1)
 		image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2GRAY)
 		#image2 = clahe.apply(image2)
+		#image2 = cv2.equalizeHist(image2)
 		#image2 = cv2.inRange(image2,np.array([0,70,255]),np.array([10,255,255]))
 	    # Converting the image to gray scale image
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -193,6 +195,25 @@ while(True):
 			shape = face_utils.shape_to_np(shape)
 			roileft = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[39][0]+8]
 			roiright = image2[shape[43][1]-8:shape[47][1]+8,shape[42][0]-8:shape[45][0]+8]
+			roileft = cv2.GaussianBlur(roileft,(7,7),0)
+			roileft = cv2.equalizeHist(roileft)
+			roileft = cv2.inRange(roileft, 0, 30)
+			kernel = np.ones((7,7),np.uint8)
+			roileft = cv2.morphologyEx(roileft, cv2.MORPH_OPEN, kernel)
+			roiright = cv2.GaussianBlur(roiright,(7,7),0)
+			roiright = cv2.equalizeHist(roiright)
+			roiright = cv2.inRange(roiright,0,30)
+			roiright = cv2.morphologyEx(roiright,cv2.MORPH_OPEN,kernel)
+			lefteye = cv2.countNonZero(roileft)
+			righteye = cv2.countNonZero(roiright)
+			if lefteye == 0 and righteye != 0:
+				ll = 1
+				print("LEFT")
+				print(lclick)
+			if righteye == 0 and lefteye != 0:
+				print("RIGHT")
+				lclick = np.append(lclick,-1)
+				ll = -1
 			[h,k] = shape[33]
 			lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41]) # Calculation of the EAR for left eye
 			righteye = EAR(shape[42],shape[43],shape[44],shape[45],shape[46],shape[47]) # Calculation of the EAR for right eye
@@ -218,11 +239,15 @@ while(True):
 			#countright = cv2.countNonZero(threshright)
 			#print(countleft - countright)
 			#retface,threshface = cv2.threshold(roiface,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-		
-			if EARdiff < leftclick and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration
-				pag.click(button = 'left') 
-			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration
+			if EARdiff < leftclick and larea < leftclickarea and ll == 1: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
+				pag.click(button = 'left')
+				lclick = np.array([])
+			elif EARdiff > rightclick and rarea < rightclickarea and ll == -1: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
 				pag.click(button = 'right')
+				lclick = np.array([])
+		# Draw on our image, all the finded cordinate points (x,y) 
+		for (x, y) in shape:
+			cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 		MARlist = np.append(MARlist,[mar]) # Appending the list at every iteration
 		if len(MARlist) == 30: # till it reaches a size of 30 elements
 			mar_avg = np.mean(MARlist)
@@ -252,9 +277,6 @@ while(True):
 			else:
 				pass
 		
-		# Draw on our image, all the finded cordinate points (x,y) 
-		for (x, y) in shape:
-			cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 		cv2.circle(image,(h,k),2,(255,0,0),-1)
 		cv2.circle(image,(100,100),2,(0,0,255),-1)
 		#cv2.circle(image,(xr,yr),2,(0,0,255),-1)
@@ -278,4 +300,8 @@ while(True):
 
 cv2.destroyAllWindows()
 cap.release()
+
+
+
+
 
