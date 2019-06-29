@@ -62,7 +62,6 @@ t3 = np.array([])
 t4 = np.array([])
 pag.PAUSE = 0 # Setting the pyautogui reference time to 0.
 
-
 #importing the .dat file into the variable p, which will be used for the calculation of facial landmarks
 p = "shape_predictor.dat"
 detector = dlib.get_frontal_face_detector() # Returns a default face detector object
@@ -79,6 +78,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 currenttime = time.time()#captures the current UNIX time
 while(time.time() - currenttime <= 25): #The calibration code will run for 23 seconds.
 	ret,image = cap.read()
+	blackimage = np.zeros((480,640,3),dtype = np.uint8)
 	image = cv2.flip(image,1)
 	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 	clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
@@ -102,23 +102,23 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		rarea = cv2.contourArea(rightEyeHull)
 		elapsedTime = time.time() - currenttime
 		if elapsedTime < 5.0: # recording the phase where both eyes are open
-			cv2.putText(image,'Keep Both Eyes Open',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
+			cv2.putText(blackimage,'Keep Both Eyes Open',(0,100), font, 1,(255,255,255),2,cv2.LINE_AA)
 			eyeopen = np.append(eyeopen,[EARdiff])
 			t1 = np.append(t1,[elapsedTime])
 		elif elapsedTime > 5.0 and elapsedTime < 10.0: # recording the phase when only left eye is closed
-			cv2.putText(image,'Close Left Eye',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
+			cv2.putText(blackimage,'Close Left Eye',(0,100), font, 1,(255,255,255),2,cv2.LINE_AA)
 			if elapsedTime > 7.0 and elapsedTime < 10.0:
 				lclick = np.append(lclick,[EARdiff])
 				lclickarea = np.append(lclickarea,[larea])
 				t2 = np.append(t2,[elapsedTime])
 		elif elapsedTime > 12.0 and elapsedTime < 17.0: # recording the phase for only right eye
-			cv2.putText(image,'Open Left eye and close Right Eye',(0,100), font, 1,(0,0,0),2,cv2.LINE_AA)
+			cv2.putText(blackimage,'Open Left eye and close Right Eye',(0,100), font, 1,(255,255,255),2,cv2.LINE_AA)
 			if elapsedTime > 14.0 and elapsedTime < 17.0:
 				rclick = np.append(rclick,[EARdiff])
 				rclickarea = np.append(rclickarea,[rarea])
 				t3 = np.append(t3,[elapsedTime])
 		elif elapsedTime > 19.0 and elapsedTime < 24.0: # recording the phase for open mouth
-			cv2.putText(image,'Open Your Mouth',(0,100),font,1,(0,0,0),2,cv2.LINE_AA)
+			cv2.putText(blackimage,'Open Your Mouth',(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
 			if elapsedTime > 21.0 and elapsedTime < 24.0:
 				scroll = np.append(scroll,[mar])
 				t4 = np.append(t4,[elapsedTime])
@@ -126,7 +126,8 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 			pass 
 		for (x,y) in shape: # prints facial landmarks on the face
 			cv2.circle(image,(x,y),2,(0,255,0),-1)
-		cv2.imshow('image',image) # display of image
+		res = np.hstack((image,blackimage))
+		cv2.imshow('Cursor Controller',res) # Display of image as well as the prompt window
 	if cv2.waitKey(5) & 0xff == 27: 
 		break
 
@@ -181,8 +182,8 @@ scroll = np.sort(scroll)
 lclickarea = np.sort(lclickarea)
 rclickarea = np.sort(rclickarea)
 openeyes = np.median(eyeopen) # Calculates mean of the recorded values for the case when both eyes are opened.
-leftclick = np.median(lclick) - m.sqrt(np.std(lclick)) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
-rightclick = np.median(rclick) + m.sqrt(np.std(rclick))  # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
+leftclick = np.median(lclick) - 1#- m.sqrt(np.std(lclick)) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
+rightclick = np.median(rclick) + 1 #+ m.sqrt(np.std(rclick)) # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
 scrolling = np.median(scroll)
 leftclickarea = np.median(lclickarea)
 rightclickarea = np.median(rclickarea)
@@ -194,6 +195,7 @@ ll = 0
 while(True):
 	try: 
 		frameTimeInitial = time.time()
+		blackimage = np.zeros((480,640,3),dtype = np.uint8)
 	    # Getting out image by webcam
 		_, image = cap.read() 
 		image=cv2.flip(image,1)
@@ -246,11 +248,13 @@ while(True):
 			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
-			if EARdiff < leftclick and larea < leftclickarea and ll == 1: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
-				pag.click(button = 'left')
+			if EARdiff < leftclick and ll == 1: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
+				pag.click(button = 'left') #  and larea < leftclickarea
+				cv2.putText(blackimage,"Left Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
-			elif EARdiff > rightclick and rarea < rightclickarea and ll == -1: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
-				pag.click(button = 'right') 
+			elif EARdiff > rightclick and ll == -1: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
+				pag.click(button = 'right') # and rarea < rightclickarea 
+				cv2.putText(blackimage,"Right Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
 		# Draw on our image, all the finded cordinate points (x,y) 
 		for (x, y) in shape:
@@ -272,13 +276,15 @@ while(True):
 				if h > 250: # The below conditions set the conditions for the mouse to move and that too in any direction we desire it to move to.
 					time.sleep(0.03)
 					pag.moveTo(pag.position()[0]+(10*m.cos(-1.0*a)),pag.position()[1]+(10*m.sin(-1.0*a)),duration = 0.01)
+					cv2.putText(blackimage,"Scrolling",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
 					#a.mouse.smooth_move(a.mouse.location()(0)+(10*m.cos(-1.0*a)),a.mouse.location()(1)+(10*m.sin(-1.0*a)))
 				else:
 					time.sleep(0.03)
 					pag.moveTo(pag.position()[0]-(10*m.cos(-1.0*a)),pag.position()[1]-(10*m.sin(-1.0*a)),duration = 0.01)
+					cv2.putText(blackimage,"Scrolling",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
 					#a.mouse.smooth_move(a.mouse.location()(0)-(10*m.cos(-1.0*a)),a.mouse.location()(1)-(10*m.sin(-1.0*a)))
 		else: #Enabling scroll status
-			cv2.putText(image,'Scroll mode ON',(0,100),font,1,(0,0,0),2,cv2.LINE_AA)
+			cv2.putText(blackimage,'Scroll mode ON',(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
 			if k > 300: 
 				pag.scroll(-1)
 			elif k < 200:
@@ -287,16 +293,24 @@ while(True):
 				pass
 		
 		cv2.circle(image,(h,k),2,(255,0,0),-1)
-		cv2.imshow("Output", image)
-		cv2.imshow("Right Eye",roiright)
-		cv2.imshow("Left Eye",roileft)
+		#cv2.imshow('Output',image)
+		#cv2.imshow("Right Eye",roiright)
+		#cv2.imshow("Left Eye",roileft)
+		#cv2.imshow("Data",blackimage)
 		frameTimeFinal = time.time()
+		cv2.putText(blackimage,"FPS: "+str(int(1/(frameTimeFinal - frameTimeInitial))),(0,150),font,1,(255,255,255),2,cv2.LINE_AA)
+		cv2.putText(blackimage,"Press Esc to abort",(0,200),font,1,(255,255,255),2,cv2.LINE_AA)
+		res = np.hstack((image,blackimage))
+		cv2.imshow('Cursor Control',res)
 		k = cv2.waitKey(5) & 0xFF
 		if k == 27:
 			break
 	except: # Just display the frames in case of any error
+		blackimage = np.zeros((480,640,3),dtype = np.uint8)
+		cv2.putText(blackimage,"Landmarks Lost.\nCheck the lighting or reposition your face",(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
 		_,image = cap.read() 
 		image = cv2.flip(image,1)
+		res = np.hstack((image,blackimage))
 		cv2.imshow('Output',image)
 		k = cv2.waitKey(5) & 0xff
 		if k == 27:
