@@ -17,7 +17,11 @@ import math as m
 from scipy.ndimage import gaussian_filter
 import autopy as a
 
-pag.PAUSE = 0
+
+
+# INITIALIZATION OF VARIOUS FUNCTIONS USED IN THE PROGRAM
+
+
 # The function is used for calculation of MAR for the mouth
 def MAR(point1,point2,point3,point4,point5,point6,point7,point8):
 	mar = (dst(point1,point2) + dst(point3,point4) + dst(point5,point6))/(3.0*dst(point7,point8))
@@ -41,6 +45,10 @@ def angle(point1):
 	return agle
 
 
+
+# START OF THE MAIN PROGRAM PART I
+
+
 #Initialization of numpy arrays for storing EAR differences as well as the time (in seconds) in which it was recorded
 lclick = np.array([])
 rclick = np.array([])
@@ -52,12 +60,16 @@ t1 = np.array([])
 t2 = np.array([])
 t3 = np.array([])
 t4 = np.array([])
+pag.PAUSE = 0 # Setting the pyautogui reference time to 0.
+
+
 #importing the .dat file into the variable p, which will be used for the calculation of facial landmarks
 p = "shape_predictor.dat"
 detector = dlib.get_frontal_face_detector() # Returns a default face detector object
 predictor = dlib.shape_predictor(p) # Outputs a set of location points that define a pose of the object. (Here, pose of the human face)
 (lstart,lend) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rstart,rend) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+
 
 #The first snippet of code is basically for calibration of the EARdifference for left as well as the right eye
 cap = cv2.VideoCapture(0)
@@ -73,7 +85,7 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 	gray = clahe.apply(gray)
 	#gray = cv2.equalizeHist(gray)
 	rects = detector(gray,0)
-	for (i,rect) in enumerate(rects):
+	for (i,rect) in enumerate(rects): # Loop used for the prediction of facial landmarks 
 		shape = predictor(gray,rect)
 		shape = face_utils.shape_to_np(shape)
 		lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41])
@@ -118,6 +130,11 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 	if cv2.waitKey(5) & 0xff == 27: 
 		break
 
+
+
+# PLOTTING OF THE RECORDED DATA
+
+
 # Plotting the recorded points when both eyes are open
 plt.subplot(2,2,1)
 eyeopen_smooth = gaussian_filter(eyeopen,sigma = 5)
@@ -147,11 +164,17 @@ cap.release()
 cv2.destroyAllWindows()
 
 
+
+# START OF THE MAIN PROGRAM PART II
+
+
+
 # The second snippet of code consists of the main code, where all the cursor controlling using face gestures will take place
 cap = cv2.VideoCapture(0)
 MARlist = np.array([]) # Initialization of a MAR list which will be resued after every 30 iterations
 scroll_status = 0 # Checks the scroll status: 1:ON 0:OFF
 eyeopen = np.sort(eyeopen)
+# Sorting of the numpy arrays formed for calculation of median
 lclick = np.sort(lclick)
 rclick = np.sort(rclick)
 scroll = np.sort(scroll)
@@ -167,7 +190,6 @@ print("Standard Deviation = "+str(np.std(lclick)))
 print("Standard Deviation = "+str(np.std(rclick)))
 print("Left click value = "+str(leftclick)) # Prints the result
 print("Right click value = "+str(rightclick)) # Prints the result
-clahe = cv2.createCLAHE(clipLimit=2.0,tileGridSize=(8,8))
 ll = 0
 while(True):
 	try: 
@@ -175,17 +197,13 @@ while(True):
 	    # Getting out image by webcam
 		_, image = cap.read() 
 		image=cv2.flip(image,1)
+	    # Converting the image to gray scale image
+		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		cv2.circle(image,(250,250),50,(0,0,255),2)
+	    # Creation of another frame in order to perform some secondary operations on it. It will help in preventing the mouse from being too sensitive
 		_,image2 = cap.read()
 		image2 = cv2.flip(image2,1)
 		image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2GRAY)
-		#image2 = clahe.apply(image2)
-		#image2 = cv2.equalizeHist(image2)
-		#image2 = cv2.inRange(image2,np.array([0,70,255]),np.array([10,255,255]))
-	    # Converting the image to gray scale image
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		#clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
-		#gray = clahe.apply(gray)
-		cv2.circle(image,(250,250),50,(0,0,255),2)
 	    # Get faces into webcam's image
 		rects = detector(gray, 0)
 	    # For each detected face, find the landmark.
@@ -193,6 +211,7 @@ while(True):
 		# Make the prediction and transfom it to numpy array
 			shape = predictor(gray, rect)
 			shape = face_utils.shape_to_np(shape)
+		# Making of Region of Interests for left as well as right eye, followed by filtering relevent information from it.
 			roileft = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[39][0]+8]
 			roiright = image2[shape[43][1]-8:shape[47][1]+8,shape[42][0]-8:shape[45][0]+8]
 			roileft = cv2.GaussianBlur(roileft,(7,7),0)
@@ -204,15 +223,12 @@ while(True):
 			roiright = cv2.equalizeHist(roiright)
 			roiright = cv2.inRange(roiright,0,30)
 			roiright = cv2.morphologyEx(roiright,cv2.MORPH_OPEN,kernel)
+		# Counting number of non zero pixels in the thresholded images
 			lefteye = cv2.countNonZero(roileft)
 			righteye = cv2.countNonZero(roiright)
 			if lefteye == 0 and righteye != 0:
 				ll = 1
-				print("LEFT")
-				print(lclick)
 			if righteye == 0 and lefteye != 0:
-				print("RIGHT")
-				lclick = np.append(lclick,-1)
 				ll = -1
 			[h,k] = shape[33]
 			lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41]) # Calculation of the EAR for left eye
@@ -221,6 +237,7 @@ while(True):
 			mar = MAR(shape[50],shape[58],shape[51],shape[57],shape[52],shape[56],shape[48],shape[54]) # Calculation of the MAR of mouth			
 			cv2.line(image,(250,250),(h,k),(0,0,0),1) # Draws a line between the tip of the nose and the centre of reference circle
 			# Controls the move of mouse according to the position of the found nose.
+			# Detection of eye with facial landmarks and then forming a convex hull on it. 
 			leftEye = shape[lstart:lend]
 			rightEye = shape[rstart:rend]
 			leftEyeHull = cv2.convexHull(leftEye)
@@ -229,26 +246,17 @@ while(True):
 			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
-			#roileft = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[39][0]+8]
-			#roiface = image2[shape[19][1]-2:shape[8][1]+2,shape[0][0]-2:shape[16][0]+2]
-			#roieyes = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[45][0]+8]
-			#reteyes,thresheyes = cv2.threshold(roieyes,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-			#retleft,threshleft = cv2.threshold(roileft,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-			#retright,threshright = cv2.threshold(roiright,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-			#cv2.countNonZero(threshleft)
-			#countright = cv2.countNonZero(threshright)
-			#print(countleft - countright)
-			#retface,threshface = cv2.threshold(roiface,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 			if EARdiff < leftclick and larea < leftclickarea and ll == 1: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
 				pag.click(button = 'left')
 				lclick = np.array([])
 			elif EARdiff > rightclick and rarea < rightclickarea and ll == -1: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
-				pag.click(button = 'right')
+				pag.click(button = 'right') 
 				lclick = np.array([])
 		# Draw on our image, all the finded cordinate points (x,y) 
 		for (x, y) in shape:
 			cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 		MARlist = np.append(MARlist,[mar]) # Appending the list at every iteration
+
 		if len(MARlist) == 30: # till it reaches a size of 30 elements
 			mar_avg = np.mean(MARlist)
 			MARlist = np.array([]) # Resetting the MAR list
@@ -257,6 +265,7 @@ while(True):
 					scroll_status = 1
 				else:
 					scroll_status = 0
+		# Sets the condition for scrolling mode
 		if scroll_status == 0:
 			if((h-250)**2 + (k-250)**2 - 50**2 > 0):
 				a = angle(shape[33]) # Calculates the angle
@@ -278,15 +287,10 @@ while(True):
 				pass
 		
 		cv2.circle(image,(h,k),2,(255,0,0),-1)
-		cv2.circle(image,(100,100),2,(0,0,255),-1)
-		#cv2.circle(image,(xr,yr),2,(0,0,255),-1)
 		cv2.imshow("Output", image)
 		cv2.imshow("Right Eye",roiright)
 		cv2.imshow("Left Eye",roileft)
-		#cv2.imshow("Face",threshface)
-		#cv2.imshow("Eyes",roieyes)
 		frameTimeFinal = time.time()
-		#print(1/(frameTimeFinal - frameTimeInitial))
 		k = cv2.waitKey(5) & 0xFF
 		if k == 27:
 			break
@@ -300,8 +304,3 @@ while(True):
 
 cv2.destroyAllWindows()
 cap.release()
-
-
-
-
-
