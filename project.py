@@ -11,11 +11,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 #importing time for caliberating the code for a particular time
 import time
-#importing math for basic mathematical operations
-import math as m
 #scipy used here for smoothening the matplotlib curves
 from scipy.ndimage import gaussian_filter
-import autopy as a
 
 
 
@@ -34,14 +31,13 @@ def EAR(point1,point2,point3,point4,point5,point6):
 
 # The function is used for calculating the distance between the two points. This is primarily used for calculating EAR
 def dst(point1, point2):
-	distance = m.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+	distance = np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 	return distance
 
 #The function is used for calculating the angle between the line made by the nose tip and centre of reference circle and the horizontal line passing through the centre of the reference circle
 def angle(point1):
-	# In OpenCV, since the x and y coordinates start from the top right corner of the image or the image is in the fourth quadrant, the conventions applied are in reverse.
 	slope12 = (point1[1] - 250)/(point1[0] - 250)*1.0
-	agle = -1.0*m.atan(slope12)
+	agle = 1.0*np.arctan(slope12)
 	return agle
 
 
@@ -66,8 +62,8 @@ pag.PAUSE = 0 # Setting the pyautogui reference time to 0.
 p = "shape_predictor.dat"
 detector = dlib.get_frontal_face_detector() # Returns a default face detector object
 predictor = dlib.shape_predictor(p) # Outputs a set of location points that define a pose of the object. (Here, pose of the human face)
-(lstart,lend) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
-(rstart,rend) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+(lstart,lend) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+(rstart,rend) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (mstart,mend) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
 
 #The first snippet of code is basically for calibration of the EARdifference for left as well as the right eye
@@ -83,7 +79,6 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 	clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
 	gray = clahe.apply(gray)
-	#gray = cv2.equalizeHist(gray)
 	rects = detector(gray,0)
 	for (i,rect) in enumerate(rects): # Loop used for the prediction of facial landmarks 
 		shape = predictor(gray,rect)
@@ -133,7 +128,7 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 			pass 
 		for (x,y) in shape: # prints facial landmarks on the face
 			cv2.circle(image,(x,y),2,(0,255,0),-1)
-		res = np.hstack((image,blackimage))
+		res = np.vstack((image,blackimage))
 		cv2.imshow('Calibration',res) # Display of image as well as the prompt window
 	if cv2.waitKey(5) & 0xff == 27: 
 		break
@@ -189,8 +184,8 @@ scroll = np.sort(scroll)
 lclickarea = np.sort(lclickarea)
 rclickarea = np.sort(rclickarea)
 openeyes = np.median(eyeopen) # Calculates mean of the recorded values for the case when both eyes are opened.
-leftclick = np.median(lclick) - 1#- m.sqrt(np.std(lclick)) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
-rightclick = np.median(rclick) + 1 #+ m.sqrt(np.std(rclick)) # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
+leftclick = np.median(lclick) - 1#- np.sqrt(np.std(lclick)) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
+rightclick = np.median(rclick) + 1 #+ np.sqrt(np.std(rclick)) # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
 scrolling = np.median(scroll)
 leftclickarea = np.median(lclickarea)
 rightclickarea = np.median(rclickarea)
@@ -221,24 +216,24 @@ while(True):
 			shape = predictor(gray, rect)
 			shape = face_utils.shape_to_np(shape)
 		# Making of Region of Interests for left as well as right eye, followed by filtering relevent information from it.
-			roileft = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[39][0]+8]
-			roiright = image2[shape[43][1]-8:shape[47][1]+8,shape[42][0]-8:shape[45][0]+8]
-			roileft = cv2.GaussianBlur(roileft,(7,7),0)
-			roileft = cv2.equalizeHist(roileft)
-			roileft = cv2.inRange(roileft, 0, 30)
-			kernel = np.ones((7,7),np.uint8)
-			roileft = cv2.morphologyEx(roileft, cv2.MORPH_OPEN, kernel)
-			roiright = cv2.GaussianBlur(roiright,(7,7),0)
-			roiright = cv2.equalizeHist(roiright)
-			roiright = cv2.inRange(roiright,0,30)
-			roiright = cv2.morphologyEx(roiright,cv2.MORPH_OPEN,kernel)
+			#roileft = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[39][0]+8]
+			#roiright = image2[shape[43][1]-8:shape[47][1]+8,shape[42][0]-8:shape[45][0]+8]
+			#roileft = cv2.GaussianBlur(roileft,(7,7),0)
+			#roileft = cv2.equalizeHist(roileft)
+			#roileft = cv2.inRange(roileft, 0, 30)
+			#kernel = np.ones((7,7),np.uint8)
+			#roileft = cv2.morphologyEx(roileft, cv2.MORPH_OPEN, kernel)
+			#roiright = cv2.GaussianBlur(roiright,(7,7),0)
+			#roiright = cv2.equalizeHist(roiright)
+			#roiright = cv2.inRange(roiright,0,30)
+			#roiright = cv2.morphologyEx(roiright,cv2.MORPH_OPEN,kernel)
 		# Counting number of non zero pixels in the thresholded images
-			lefteye = cv2.countNonZero(roileft)
-			righteye = cv2.countNonZero(roiright)
-			if lefteye == 0 and righteye != 0:
-				ll = 1
-			if righteye == 0 and lefteye != 0:
-				ll = -1
+			#lefteye = cv2.countNonZero(roileft)
+			#righteye = cv2.countNonZero(roiright)
+			#if lefteye == 0 and righteye != 0:
+			#	ll = 1
+			#if righteye == 0 and lefteye != 0:
+			#	ll = -1
 			[h,k] = shape[33]
 			lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41]) # Calculation of the EAR for left eye
 			righteye = EAR(shape[42],shape[43],shape[44],shape[45],shape[46],shape[47]) # Calculation of the EAR for right eye
@@ -286,14 +281,12 @@ while(True):
 				a = angle(shape[33]) # Calculates the angle
 				if h > 250: # The below conditions set the conditions for the mouse to move and that too in any direction we desire it to move to.
 					time.sleep(0.03)
-					pag.moveTo(pag.position()[0]+(10*m.cos(-1.0*a)),pag.position()[1]+(10*m.sin(-1.0*a)),duration = 0.01)
+					pag.moveTo(pag.position()[0]+(10*np.cos(1.0*a)),pag.position()[1]+(10*np.sin(1.0*a)),duration = 0.01)
 					cv2.putText(blackimage,"Scrolling",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
-					#a.mouse.smooth_move(a.mouse.location()(0)+(10*m.cos(-1.0*a)),a.mouse.location()(1)+(10*m.sin(-1.0*a)))
 				else:
 					time.sleep(0.03)
-					pag.moveTo(pag.position()[0]-(10*m.cos(-1.0*a)),pag.position()[1]-(10*m.sin(-1.0*a)),duration = 0.01)
+					pag.moveTo(pag.position()[0]-(10*np.cos(1.0*a)),pag.position()[1]-(10*np.sin(1.0*a)),duration = 0.01)
 					cv2.putText(blackimage,"Scrolling",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
-					#a.mouse.smooth_move(a.mouse.location()(0)-(10*m.cos(-1.0*a)),a.mouse.location()(1)-(10*m.sin(-1.0*a)))
 		else: #Enabling scroll status
 			cv2.putText(blackimage,'Scroll mode ON',(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
 			if k > 300:
@@ -306,14 +299,10 @@ while(True):
 				pass
 		
 		cv2.circle(image,(h,k),2,(255,0,0),-1)
-		#cv2.imshow('Output',image)
-		#cv2.imshow("Right Eye",roiright)
-		#cv2.imshow("Left Eye",roileft)
-		#cv2.imshow("Data",blackimage)
 		frameTimeFinal = time.time()
 		cv2.putText(blackimage,"FPS: "+str(int(1/(frameTimeFinal - frameTimeInitial))),(0,150),font,1,(255,255,255),2,cv2.LINE_AA)
 		cv2.putText(blackimage,"Press Esc to abort",(0,200),font,1,(255,255,255),2,cv2.LINE_AA)
-		res = np.hstack((image,blackimage))
+		res = np.vstack((image,blackimage))
 		cv2.imshow('Cursor Control',res)
 		k = cv2.waitKey(5) & 0xFF
 		if k == 27:
@@ -323,7 +312,7 @@ while(True):
 		cv2.putText(blackimage,"Landmarks Lost.\nCheck the lighting or reposition your face",(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
 		_,image = cap.read() 
 		image = cv2.flip(image,1)
-		res = np.hstack((image,blackimage))
+		res = np.vstack((image,blackimage))
 		cv2.imshow('Cursor Control',res)
 		k = cv2.waitKey(5) & 0xff
 		if k == 27:
