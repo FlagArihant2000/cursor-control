@@ -68,7 +68,7 @@ detector = dlib.get_frontal_face_detector() # Returns a default face detector ob
 predictor = dlib.shape_predictor(p) # Outputs a set of location points that define a pose of the object. (Here, pose of the human face)
 (lstart,lend) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rstart,rend) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
-
+(mstart,mend) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
 
 #The first snippet of code is basically for calibration of the EARdifference for left as well as the right eye
 cap = cv2.VideoCapture(0)
@@ -94,12 +94,19 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		EARdiff = (lefteye - righteye)*100
 		leftEye = shape[lstart:lend]
 		rightEye = shape[rstart:rend]
+		mouthroi = shape[mstart:mend]
 		leftEyeHull = cv2.convexHull(leftEye)
 		rightEyeHull = cv2.convexHull(rightEye)
+		mouthHull = cv2.convexHull(mouthroi)
+		cv2.drawContours(image,[mouthroi],-1,(0,255,0),1)
 		cv2.drawContours(image,[leftEyeHull],-1,(0,255,0),1)
 		cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
+		marea = cv2.contourArea(mouthHull)
 		larea = cv2.contourArea(leftEyeHull)
 		rarea = cv2.contourArea(rightEyeHull)
+		LAR = larea/marea
+		RAR = rarea/marea
+		print(LAR,RAR)
 		elapsedTime = time.time() - currenttime
 		if elapsedTime < 5.0: # recording the phase where both eyes are open
 			cv2.putText(blackimage,'Keep Both Eyes Open',(0,100), font, 1,(255,255,255),2,cv2.LINE_AA)
@@ -127,7 +134,7 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		for (x,y) in shape: # prints facial landmarks on the face
 			cv2.circle(image,(x,y),2,(0,255,0),-1)
 		res = np.hstack((image,blackimage))
-		cv2.imshow('Cursor Controller',res) # Display of image as well as the prompt window
+		cv2.imshow('Calibration',res) # Display of image as well as the prompt window
 	if cv2.waitKey(5) & 0xff == 27: 
 		break
 
@@ -242,18 +249,22 @@ while(True):
 			# Detection of eye with facial landmarks and then forming a convex hull on it. 
 			leftEye = shape[lstart:lend]
 			rightEye = shape[rstart:rend]
+			mouthroi = shape[mstart:mend]
 			leftEyeHull = cv2.convexHull(leftEye)
 			rightEyeHull = cv2.convexHull(rightEye)
+			mouthHull = cv2.convexHull(mouthroi)
+			cv2.drawContours(image,[mouthroi],-1,(0,255,0),1)
 			cv2.drawContours(image,[leftEyeHull],-1,(0,255,0),1)
 			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
-			if EARdiff < leftclick and ll == 1: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
-				pag.click(button = 'left') #  and larea < leftclickarea
+			marea = cv2.contourArea(mouthHull)
+			if EARdiff < leftclick and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
+				pag.click(button = 'left') #  and ll == 1  
 				cv2.putText(blackimage,"Left Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
-			elif EARdiff > rightclick and ll == -1: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
-				pag.click(button = 'right') # and rarea < rightclickarea 
+			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
+				pag.click(button = 'right') #   and ll == -1
 				cv2.putText(blackimage,"Right Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
 		# Draw on our image, all the finded cordinate points (x,y) 
@@ -285,9 +296,11 @@ while(True):
 					#a.mouse.smooth_move(a.mouse.location()(0)-(10*m.cos(-1.0*a)),a.mouse.location()(1)-(10*m.sin(-1.0*a)))
 		else: #Enabling scroll status
 			cv2.putText(blackimage,'Scroll mode ON',(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
-			if k > 300: 
+			if k > 300:
+				cv2.putText(blackimage,"Scrolling Down",(0,300),font,1,(255,255,255),2,cv2.LINE_AA) 
 				pag.scroll(-1)
 			elif k < 200:
+				cv2.putText(blackimage,"Scrolling Up",(0,300),font,1,(255,255,255),2,cv2.LINE_AA) 
 				pag.scroll(1)
 			else:
 				pass
@@ -311,7 +324,7 @@ while(True):
 		_,image = cap.read() 
 		image = cv2.flip(image,1)
 		res = np.hstack((image,blackimage))
-		cv2.imshow('Output',image)
+		cv2.imshow('Cursor Control',res)
 		k = cv2.waitKey(5) & 0xff
 		if k == 27:
 			break
