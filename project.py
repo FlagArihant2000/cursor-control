@@ -85,7 +85,7 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		shape = face_utils.shape_to_np(shape)
 		lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41])
 		righteye = EAR(shape[42],shape[43],shape[44],shape[45],shape[46],shape[47])
-		mar = MAR(shape[50],shape[58],shape[51],shape[57],shape[52],shape[56],shape[48],shape[54])
+		mar = MAR(shape[50],shape[58],shape[51],shape[57],shape[52],shape[56],shape[48],shape[54]) 
 		EARdiff = (lefteye - righteye)*100
 		leftEye = shape[lstart:lend]
 		rightEye = shape[rstart:rend]
@@ -282,11 +282,11 @@ while(True):
 				if h > 250: # The below conditions set the conditions for the mouse to move and that too in any direction we desire it to move to.
 					time.sleep(0.03)
 					pag.moveTo(pag.position()[0]+(10*np.cos(1.0*a)),pag.position()[1]+(10*np.sin(1.0*a)),duration = 0.01)
-					cv2.putText(blackimage,"Scrolling",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
+					cv2.putText(blackimage,"Moving",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
 				else:
 					time.sleep(0.03)
 					pag.moveTo(pag.position()[0]-(10*np.cos(1.0*a)),pag.position()[1]-(10*np.sin(1.0*a)),duration = 0.01)
-					cv2.putText(blackimage,"Scrolling",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
+					cv2.putText(blackimage,"Moving",(0,250),font,1,(255,255,255),2,cv2.LINE_AA)
 		else: #Enabling scroll status
 			cv2.putText(blackimage,'Scroll mode ON',(0,100),font,1,(255,255,255),2,cv2.LINE_AA)
 			if k > 300:
