@@ -1,10 +1,42 @@
-# Summer-Project
-This repository consists of the summer project 2019 along with some side projects done during the month of June
+# CURSOR-CONTROL-USING-FACE-GESTURES
 
-VDP.py - This project basically deals with making a virtual drawing pad and drawing various shapes without the use of mouse. The video frames are converted to HSV and is thresholded to filter only the green colour, which will act as the "stylus" for us to draw with. A contour is drawn around the "stylus" and then a centroid is calculated for it, which acts as the point using which drawing will take place. The drawings are printed corresponding to the coordinates of the centroid on the real video on another white window. The color and the size of the paint can be changed using the trackbars provided with the code.
+##OVERVIEW:
+Computer Vision is used for catering the needs of the users who are invalid in the sense that they are not able to perform basic operations on the computer such as the use of mouse. Without the use of any physical help, these user can now be able to use the mouse using simple facial gestures such as blinking. Blinking of left or right eye will initiate a left or right click respectively. 
 
-points.py - This project basically deals with controlling the mouse cursor using face gestures. Left eye blink indicates left click, right eye blink indicated right click and moving the tip of the nose will move the mouse cursor. The code first finds facial landmarks on the face using the .dat file provided with the repository. Basically it is used to predict the facial landmarks on the face. Altogether, there are 68 such landmark points on the face, out of which, 34rd(33rd index) is identified as the nose tip, 37-42 identified as the left eye and 43-48 identified as the right eye. Now, the tip of the nose is integrated with the mouse using a library called as pyautogui. The algorithm is coded in such as way that the mouse will move in the direction in which the nose is pointing to. This is achieved using polar coordinates. Basically, angle is calculated for between the two lines, the first line made by the centre of the reference circle in which the nose movement will not be plotted, and the second line is a horizontal line passing from the centre of the reference circle(this circle will be plotted in red on the output screen). 
-As for the eyes, the initial part of the code snippet basically calibrates the Eye Aspect Ratio or EAR in short, for left and right eye which is suitable for the person which is using it. The reference for the code wil be the difference between the left eye EAR and the right eye EAR, so that when both the eyes are either open or closed, there wouldn't be any change or click. Rest of the explanation of the code is written in the form of comments.
-Coming to the mouth, a sample of 30 iterations of the MAR(Mouth Aspect Ratio) is taken, followed by taking its average. Then those 30 iterations are discarded and then the computed average is compared with the threshold average. If it exceeds the threshold average, then the scroll mode is on and so the user will be able to move the nose up and down for scrolling up and down respectively. The same procedure is applied for swtiching OFF the scrolling mode. 
+Many of the products in the market related to this project are present in the market and are often expensive or require some external hardware for configuration. In this project, we aim at designing a similar product which does not require any external hardware and is open – sourced.
 
-hough.py - It is just a small program which generates the hough line without using the pre-made function. 
+A face is divided into 68 distinct landmarks, rather than taking the entire face into account, which makes the working algorithm very fast. Exploiting the orientation of the points on the eye, we use the concept of Eye Aspect Ratio, which is used to determine whether the eye is open or closed. 
+
+For scrolling on the page, we have used the concept of Mouth Aspect Ratio, which is just used to determine whether the mouth is open or closed. Opening the mouth for about 5 seconds will activate the scrolling mode and the mouse which used to move up and down will now scroll up and down. For deactivating the scroll one, the user can do the same action again. 
+
+For moving the mouse cursor across the screen, the user must move the nose out of a reference circle. In whatever direction the user keeps their nose with respect to the centre of the circle, the mouse will move in that direction. Keeping the nose tip in the reference circle will stop the moving cursor. 
+
+The above code was tested and run on Intel® Core™ i5-8250U CPU @ 1.60GHz × 8. All the code was written on gedit file in Ubuntu version 18.04 (Bionic Beaver).
+
+##REQUIREMENTS:
+
+numpy==1.16.4
+scipy==1.3.0
+matplotlib==3.1.0
+dlib==19.17.0
+imutils==0.5.2
+opencv-python==4.1.0
+pyautogui==0.9.4
+
+##SAMPLE-PORTAL:
+
+Here, the user in front of the camera in blinking his left eye for initiating a left click. The black window will show the current frames per second and shows whatever action we are doing, for example, moving the mouse, left click, right click and also shows whether the scroll mode is on or not. 
+
+##TEAM-MEMBERS:
+
+1. Arihant Gaur
+2. Nilakshi Rekhawar
+3. Shubhan Rukumangad
+4. Akshata Kinage
+
+##MENTORS:
+
+1. Rohit Lal
+2. Abhay Khandelwal
+3. Shubham Chauhan
+
