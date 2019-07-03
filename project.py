@@ -1,3 +1,8 @@
+
+
+# IMPORTING LIBRARIES
+
+
 #importing imutils and dlib for determination of face landmarks
 from imutils import face_utils 
 import dlib
@@ -216,17 +221,6 @@ while(True):
 			shape = predictor(gray, rect)
 			shape = face_utils.shape_to_np(shape)
 		# Making of Region of Interests for left as well as right eye, followed by filtering relevent information from it.
-			#roileft = image2[shape[37][1]-8:shape[40][1]+8,shape[36][0]-8:shape[39][0]+8]
-			#roiright = image2[shape[43][1]-8:shape[47][1]+8,shape[42][0]-8:shape[45][0]+8]
-			#roileft = cv2.GaussianBlur(roileft,(7,7),0)
-			#roileft = cv2.equalizeHist(roileft)
-			#roileft = cv2.inRange(roileft, 0, 30)
-			#kernel = np.ones((7,7),np.uint8)
-			#roileft = cv2.morphologyEx(roileft, cv2.MORPH_OPEN, kernel)
-			#roiright = cv2.GaussianBlur(roiright,(7,7),0)
-			#roiright = cv2.equalizeHist(roiright)
-			#roiright = cv2.inRange(roiright,0,30)
-			#roiright = cv2.morphologyEx(roiright,cv2.MORPH_OPEN,kernel)
 		# Counting number of non zero pixels in the thresholded images
 			#lefteye = cv2.countNonZero(roileft)
 			#righteye = cv2.countNonZero(roiright)
