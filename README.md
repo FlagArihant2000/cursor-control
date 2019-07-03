@@ -2,9 +2,9 @@
 
 ## OVERVIEW
 
-Computer Vision is used for catering the needs of the users who are invalid in the sense that they are not able to perform basic operations on the computer such as the use of mouse. Without the use of any physical help, these user can now be able to use the mouse using simple facial gestures such as blinking. Blinking of left or right eye will initiate a left or right click respectively. 
+Computer Vision is used for catering the needs of the users who are invalid in the sense that they are not able to perform basic operations on the computer such as the use of mouse. Without the use of any physical help, the user can now be able to use the mouse using simple facial gestures such as blinking. Blinking of left or right eye will initiate a left or right click respectively. 
 
-Many of the products in the market related to this project are present in the market and are often expensive or require some external hardware for configuration. In this project, we aim at designing a similar product which does not require any external hardware and is open – sourced.
+Many of the products related to this project are present in the market and are often expensive or require some external hardware for configuration. In this project, we aim at designing a similar product which does not require any external hardware and is open – sourced.
 
 ![2](https://user-images.githubusercontent.com/45517467/60567293-2ba6ac80-9d87-11e9-943e-8d1c2ea2d5dd.png)
 
