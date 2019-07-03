@@ -1,6 +1,7 @@
 # CURSOR-CONTROL-USING-FACE-GESTURES
 
-##OVERVIEW:
+## OVERVIEW
+
 Computer Vision is used for catering the needs of the users who are invalid in the sense that they are not able to perform basic operations on the computer such as the use of mouse. Without the use of any physical help, these user can now be able to use the mouse using simple facial gestures such as blinking. Blinking of left or right eye will initiate a left or right click respectively. 
 
 Many of the products in the market related to this project are present in the market and are often expensive or require some external hardware for configuration. In this project, we aim at designing a similar product which does not require any external hardware and is open – sourced.
@@ -13,7 +14,7 @@ For moving the mouse cursor across the screen, the user must move the nose out o
 
 The above code was tested and run on Intel® Core™ i5-8250U CPU @ 1.60GHz × 8. All the code was written on gedit file in Ubuntu version 18.04 (Bionic Beaver).
 
-##REQUIREMENTS:
+## REQUIREMENTS
 
 numpy==1.16.4
 scipy==1.3.0
@@ -23,18 +24,18 @@ imutils==0.5.2
 opencv-python==4.1.0
 pyautogui==0.9.4
 
-##SAMPLE-PORTAL:
+## SAMPLE-PORTAL
 
 Here, the user in front of the camera in blinking his left eye for initiating a left click. The black window will show the current frames per second and shows whatever action we are doing, for example, moving the mouse, left click, right click and also shows whether the scroll mode is on or not. 
 
-##TEAM-MEMBERS:
+## TEAM-MEMBERS
 
 1. Arihant Gaur
 2. Nilakshi Rekhawar
 3. Shubhan Rukumangad
 4. Akshata Kinage
 
-##MENTORS:
+## MENTORS
 
 1. Rohit Lal
 2. Abhay Khandelwal
