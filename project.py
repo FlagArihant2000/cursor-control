@@ -222,12 +222,6 @@ while(True):
 			shape = face_utils.shape_to_np(shape)
 		# Making of Region of Interests for left as well as right eye, followed by filtering relevent information from it.
 		# Counting number of non zero pixels in the thresholded images
-			#lefteye = cv2.countNonZero(roileft)
-			#righteye = cv2.countNonZero(roiright)
-			#if lefteye == 0 and righteye != 0:
-			#	ll = 1
-			#if righteye == 0 and lefteye != 0:
-			#	ll = -1
 			[h,k] = shape[33]
 			lefteye = EAR(shape[36],shape[37],shape[38],shape[39],shape[40],shape[41]) # Calculation of the EAR for left eye
 			righteye = EAR(shape[42],shape[43],shape[44],shape[45],shape[46],shape[47]) # Calculation of the EAR for right eye
@@ -248,11 +242,11 @@ while(True):
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
 			marea = cv2.contourArea(mouthHull)
-			if EARdiff < leftclick and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
+			if EARdiff < leftclick and larea < leftclickarea and ll % 2 == 0: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
 				pag.click(button = 'left') #  and ll == 1  
 				cv2.putText(blackimage,"Left Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
-			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
+			elif EARdiff > rightclick and rarea < rightclickarea and ll % 2 == 0: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
 				pag.click(button = 'right') #   and ll == -1
 				cv2.putText(blackimage,"Right Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
@@ -260,7 +254,6 @@ while(True):
 		for (x, y) in shape:
 			cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 		MARlist = np.append(MARlist,[mar]) # Appending the list at every iteration
-
 		if len(MARlist) == 30: # till it reaches a size of 30 elements
 			mar_avg = np.mean(MARlist)
 			MARlist = np.array([]) # Resetting the MAR list
