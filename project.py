@@ -45,6 +45,9 @@ def angle(point1):
 	agle = 1.0*np.arctan(slope12)
 	return agle
 
+def nothing(x):
+	pass
+
 
 
 # START OF THE MAIN PROGRAM PART I
@@ -106,7 +109,7 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		rarea = cv2.contourArea(rightEyeHull)
 		LAR = larea/marea
 		RAR = rarea/marea
-		print(LAR,RAR)
+		print(EARdiff)
 		elapsedTime = time.time() - currenttime
 		if elapsedTime < 5.0: # recording the phase where both eyes are open
 			cv2.putText(blackimage,'Keep Both Eyes Open',(0,100), font, 1,(255,255,255),2,cv2.LINE_AA)
@@ -189,8 +192,8 @@ scroll = np.sort(scroll)
 lclickarea = np.sort(lclickarea)
 rclickarea = np.sort(rclickarea)
 openeyes = np.median(eyeopen) # Calculates mean of the recorded values for the case when both eyes are opened.
-leftclick = np.median(lclick) - 1#- np.sqrt(np.std(lclick)) # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
-rightclick = np.median(rclick) + 1 #+ np.sqrt(np.std(rclick)) # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
+leftclick = np.median(lclick) - 1 # Calculates mean of the recorded values for left click. Subtracting a constant to make it a bit more flexible
+rightclick = np.median(rclick) + 1 # Calculates mean of the recorded values for right click. Adding a constant to make it a bit more flexible
 scrolling = np.median(scroll)
 leftclickarea = np.median(lclickarea)
 rightclickarea = np.median(rclickarea)
@@ -236,18 +239,18 @@ while(True):
 			leftEyeHull = cv2.convexHull(leftEye)
 			rightEyeHull = cv2.convexHull(rightEye)
 			mouthHull = cv2.convexHull(mouthroi)
-			cv2.drawContours(image,[mouthroi],-1,(0,255,0),1)
+			cv2.drawContours(image,[mouthroi],-1,(0,255,0),1) 
 			cv2.drawContours(image,[leftEyeHull],-1,(0,255,0),1)
 			cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
 			larea = cv2.contourArea(leftEyeHull)
 			rarea = cv2.contourArea(rightEyeHull)
 			marea = cv2.contourArea(mouthHull)
-			if EARdiff < leftclick and larea < leftclickarea and ll % 2 == 0: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
-				pag.click(button = 'left') #  and ll == 1  
+			if EARdiff < leftclick and larea < leftclickarea: # Left click will be initiated if the EARdiff is less than the leftclick calculated during calibration 
+				pag.click(button = 'left') 
 				cv2.putText(blackimage,"Left Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
-			elif EARdiff > rightclick and rarea < rightclickarea and ll % 2 == 0: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
-				pag.click(button = 'right') #   and ll == -1
+			elif EARdiff > rightclick and rarea < rightclickarea: # Right click will be initiated if the EARdiff is more than the rightclick calculated during calibration 
+				pag.click(button = 'right') 
 				cv2.putText(blackimage,"Right Click",(0,300),font,1,(255,255,255),2,cv2.LINE_AA)
 				lclick = np.array([])
 		# Draw on our image, all the finded cordinate points (x,y) 
