@@ -101,6 +101,8 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		leftEyeHull = cv2.convexHull(leftEye)
 		rightEyeHull = cv2.convexHull(rightEye)
 		mouthHull = cv2.convexHull(mouthroi)
+		learmar = lefteye/mar
+		rearmar = righteye/mar
 		cv2.drawContours(image,[mouthroi],-1,(0,255,0),1)
 		cv2.drawContours(image,[leftEyeHull],-1,(0,255,0),1)
 		cv2.drawContours(image,[rightEyeHull],-1,(0,255,0),1)
@@ -109,7 +111,7 @@ while(time.time() - currenttime <= 25): #The calibration code will run for 23 se
 		rarea = cv2.contourArea(rightEyeHull)
 		LAR = larea/marea
 		RAR = rarea/marea
-		print(EARdiff)
+		print(learmar,rearmar)
 		elapsedTime = time.time() - currenttime
 		if elapsedTime < 5.0: # recording the phase where both eyes are open
 			cv2.putText(blackimage,'Keep Both Eyes Open',(0,100), font, 1,(255,255,255),2,cv2.LINE_AA)
@@ -211,6 +213,8 @@ while(True):
 		image=cv2.flip(image,1)
 	    # Converting the image to gray scale image
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize = (8,8))
+		gray = clahe.apply(gray)
 		cv2.circle(image,(250,250),50,(0,0,255),2)
 	    # Creation of another frame in order to perform some secondary operations on it. It will help in preventing the mouse from being too sensitive
 		_,image2 = cap.read()
